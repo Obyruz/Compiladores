@@ -114,15 +114,16 @@ void busca_tipo_da_variavel( Atributo& ss, const Atributo& s1 ) {
 }
 
 void gera_codigo_atribuicao( Atributo& ss, const Atributo& s1, const Atributo& s3 ) {
-  if( s1.t.nome == s3.t.nome &&
-      ( 
-      (s1.t.nome == Quebrado.nome && s3.t.nome == Inteiro.nome ) || 
-      (s3.t.nome == Quebrado.nome && s1.t.nome == Inteiro.nome ) )
-      ) {
-    ss.c = s1.c + s3.c + "  " + s1.v + " = " + s3.v + ";\n";
-  }
-  else if( s1.t.nome == s3.t.nome &&  s1.t.nome == "string" ) {
-    ss.c = s1.c + s3.c + "  " + "strncpy( " + s1.v + ", " + s3.v + ", " + toString(s1.t.dim[0].fim) +" );\n"; //não tá funcionando
+  if( s1.t.nome == s3.t.nome ) {
+    if( (s1.t.nome == Quebrado.nome && s3.t.nome == Inteiro.nome ) || 
+      (s3.t.nome == Quebrado.nome && s1.t.nome == Inteiro.nome ) ||
+      (s1.t.nome == Inteiro.nome && s3.t.nome == Inteiro.nome ) || 
+      (s1.t.nome == Quebrado.nome && s3.t.nome == Quebrado.nome ) ) {
+      ss.c = s1.c + s3.c + "  " + s1.v + " = " + s3.v + ";\n";
+    }
+    else if( s1.t.nome == "string" ) {
+      ss.c = s1.c + s3.c + "  " + "strncpy( " + s1.v + ", " + s3.v + ", " + toString(s1.t.dim[0].fim) +" );\n"; //não tá funcionando
+    }
   }
 }
 
