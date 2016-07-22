@@ -1,0 +1,39 @@
+DECLARO
+  inTeIRo ~ a;
+  quebrado ~ a1, b, c;
+  booleano ~ x1, y1;
+  QUEBRADO ~ resultado;
+  STRING[20] ~ pol;
+
+funcao string ~ abra
+{
+	ImprimeLn( 'sou uma funcao feliz :) ');
+	retorno a;
+}
+
+FUNCAO QUEBRADO ~ marmota(INTEIRO ~ numero)
+{
+  resultado <- 0;
+  resultado <- resultado + numero;	
+
+  IMPRIMELN('DECLARACAO DE VARIAVEIS DENTRO DA FUNCAO NAO ESTA FUNCIONANDO POR ENQUANTO');
+
+  RETORNO resultado;
+}
+
+FUNCAO semtipo
+{
+  IMPRIMELN( 'void look alike' );
+}
+
+{
+  b <- 52 * 2 * (3.14);
+  a <- b / 2;
+
+  pol <- 'Vai dar merda.';
+
+  Imprime( 'Valor: ' );
+  ImprimeLn( a );
+  ImprimeLn( pol );
+}
+
