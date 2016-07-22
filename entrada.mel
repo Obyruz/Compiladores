@@ -4,6 +4,7 @@ DECLARO
   booleano ~ x1, y1;
   QUEBRADO ~ resultado;
   STRING[20] ~ pol;
+  String ~ birl;
 
 funcao string ~ abra
 {
@@ -30,6 +31,7 @@ FUNCAO semtipo
   b <- 52 * 2 * (3.14);
   a <- b / 2;
 
+  birl <- 'Que não vai dar porra.';
   pol <- 'Vai dar merda.';
 
   Imprime( 'Valor: ' );

@@ -1,0 +1,16 @@
+C-Assembly
+1) Expressão com um operador.
+a = b <OP> c
+
+2) Um indice:
+a = b[c];
+a[b] = c;
+
+3) teste: if( var ) goto...
+
+4) goto e label.
+L1:
+
+5) Funções
+
+6) array dim = 1
