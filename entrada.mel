@@ -45,6 +45,11 @@ FUNCAO semtipo
 		ImprimeLn ( 'Nao deu merda.' );
 	};
 
+	se a < 2 entao
+	{
+		ImprimeLn ( 'Funciona?' );
+	};
+
   Imprime( 'Valor: ' );
   ImprimeLn( a );
   ImprimeLn( pol );

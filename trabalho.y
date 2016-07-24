@@ -183,6 +183,22 @@ string declara_var_temp( map< string, int >& temp ) {
 
 void gera_cmd_if( Atributo& ss, 
                   const Atributo& exp, 
+                  const Atributo& cmd_entao ) { 
+  string lbl_entao = gera_nome_label( "entao" );
+  string lbl_fim_if = gera_nome_label( "fim_if" );
+  
+  if( exp.t.nome != Booleano.nome )
+    erro( "A expressão do SE deve ser booleana!" );
+    
+  ss.c = exp.c + 
+         "\nif( " + exp.v + " ) goto " + lbl_entao + ";\n" +
+         lbl_entao + ":;\n" + 
+         cmd_entao.c + "\n" +
+         lbl_fim_if + ":;\n"; 
+}
+
+void gera_cmd_if_then( Atributo& ss, 
+                  const Atributo& exp, 
                   const Atributo& cmd_entao, 
                   const Atributo& cmd_senao ) { 
   string lbl_entao = gera_nome_label( "entao" );
@@ -314,9 +330,9 @@ BLOCO : '{' COMANDOS '}' { $$ = $2; }
 RETORNO : _RETORNO EXPRESSAO ';'
 	;
     
-COMANDO_SE : _SE EXPRESSAO _ENTAO COMANDO
+COMANDO_SE : _SE EXPRESSAO _ENTAO COMANDO { gera_cmd_if( $$, $2, $4 ); }
        | _SE EXPRESSAO _ENTAO COMANDO _SENAO COMANDO
-         { gera_cmd_if( $$, $2, $4, $6); }
+         { gera_cmd_if_then( $$, $2, $4, $6); }
        ;    
     
 SAIDA : _IMPRIME '(' EXPRESSAO ')'
