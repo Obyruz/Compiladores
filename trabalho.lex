@@ -36,27 +36,29 @@ CONSTANTE_QUEBRADO {DIGITO}+\.{DIGITO}+
 {WS} { yyrowno += 1; }
 
 {IMPRIMELN} 	{ trata_folha(); return _IMPRIMELN; } 
-{IMPRIME} 	{ trata_folha(); return _IMPRIME; }
-{STRING} 	{ trata_folha(); return _STRING; }
-{INTEIRO} 	{ trata_folha(); return _INTEIRO; }
-{QUEBRADO}	{ trata_folha(); return _QUEBRADO; }
-{DUPLO}		{ trata_folha(); return _DUPLO; }
-{BOOLEANO} 	{ trata_folha(); return _BOOLEANO; }
-{CARACTER}	{ trata_folha(); return _CARACTER; }
-{DECLARO}	{ trata_folha(); return _DECLARO; }
-{SENAO} 	{ trata_folha(); return _SENAO; }
-{RETORNO}	{ trata_folha(); return _RETORNO; }
-{PARA} 		{ trata_folha(); return _PARA; }
-{ATE}		{ trata_folha(); return _ATE; }
-{FACA} 		{ trata_folha(); return _FACA; }
-{FUNCAO}	{ trata_folha(); return _FUNCAO; }
+{IMPRIME} 		{ trata_folha(); return _IMPRIME; }
+{STRING} 			{ trata_folha(); return _STRING; }
+{INTEIRO} 		{ trata_folha(); return _INTEIRO; }
+{QUEBRADO}		{ trata_folha(); return _QUEBRADO; }
+{DUPLO}				{ trata_folha(); return _DUPLO; }
+{BOOLEANO} 		{ trata_folha(); return _BOOLEANO; }
+{CARACTER}		{ trata_folha(); return _CARACTER; }
+{DECLARO}			{ trata_folha(); return _DECLARO; }
+{SE}					{ trata_folha(); return _SE; }
+{ENTAO}				{ trata_folha(); return _ENTAO; }
+{SENAO} 			{ trata_folha(); return _SENAO; }
+{RETORNO}			{ trata_folha(); return _RETORNO; }
+{PARA} 				{ trata_folha(); return _PARA; }
+{ATE}					{ trata_folha(); return _ATE; }
+{FACA} 				{ trata_folha(); return _FACA; }
+{FUNCAO}			{ trata_folha(); return _FUNCAO; }
 
 {CONSTANTE_STRING} 	{ trata_aspas_simples(); return _CONSTANTE_STRING; }
 {CONSTANTE_INTEIRO} 	{ trata_folha(); return _CONSTANTE_INTEIRO; }
 {CONSTANTE_QUEBRADO}    { trata_folha(); return _CONSTANTE_QUEBRADO; }
 
 "<-"			{ trata_folha(); return _ATRIBUICAO; }
-"="			{ trata_folha(); yylval.v = "=="; return _COMPARACAO; }
+"="			{ trata_folha(); yylval.v = "=="; return '='; }
 
 {IDENTIFICADOR}  { trata_folha(); return _IDENTIFICADOR; }
 

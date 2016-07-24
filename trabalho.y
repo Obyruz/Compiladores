@@ -181,20 +181,27 @@ string declara_var_temp( map< string, int >& temp ) {
   return decls;
 }
 
-
-
-void gera_cmd_if( Atributo& ss, const Atributo& exp, const Atributo& cmd_then, const Atributo& cmd_else ) {
-  string lbl_then = gera_nome_label( "then " );
-  string lbl_end_if = gera_nome_label( "end_if" );
+void gera_cmd_if( Atributo& ss, 
+                  const Atributo& exp, 
+                  const Atributo& cmd_entao, 
+                  const Atributo& cmd_senao ) { 
+  string lbl_entao = gera_nome_label( "entao" );
+  string lbl_fim_if = gera_nome_label( "fim_if" );
+  
   if( exp.t.nome != Booleano.nome )
     erro( "A expressão do SE deve ser booleana!" );
-
-  ss.c = exp.c + "\n if( " + exp.v + " ) goto " + lbl_then + ";\n" + cmd_else.c + " goto " + lbl_end_if + ";\n\n" + "label " + lbl_then + ":\n" + cmd_then.c + "\n" + "label " + lbl_end_if + ":\n";
+    
+  ss.c = exp.c + 
+         "\nse( " + exp.v + " ) goto " + lbl_entao + ";\n" +
+         cmd_senao.c + "  goto " + lbl_fim_if + ";\n\n" +
+         lbl_entao + ":;\n" + 
+         cmd_entao.c + "\n" +
+         lbl_fim_if + ":;\n"; 
 }
 %}
 
 %token _IDENTIFICADOR _PROGRAM _IMPRIMELN _IMPRIME _DECLARO _SE _ENTAO _SENAO
-%token _PARA _ATE _FACA _ATRIBUICAO _FUNCAO _RETORNO _COMPARACAO
+%token _PARA _ATE _FACA _ATRIBUICAO _FUNCAO _RETORNO
 %token _INTEIRO _STRING _QUEBRADO _DUPLO _BOOLEANO _CARACTER
 
 %token _CONSTANTE_STRING _CONSTANTE_INTEIRO _CONSTANTE_QUEBRADO
@@ -301,7 +308,7 @@ EXPRESSOES : EXPRESSAO ',' EXPRESSOES
 COMANDO_PARA : _PARA _IDENTIFICADOR _ATRIBUICAO EXPRESSAO _ATE EXPRESSAO _FACA COMANDO
         ;
     
-BLOCO : '{' COMANDOS '}'
+BLOCO : '{' COMANDOS '}' { $$ = $2; }
       ;    
 
 RETORNO : _RETORNO EXPRESSAO ';'
@@ -325,6 +332,7 @@ EXPRESSAO : EXPRESSAO '+' EXPRESSAO { gera_codigo_operador( $$, $1, $2, $3 ); }
   | EXPRESSAO '%' EXPRESSAO 	    { gera_codigo_operador( $$, $1, $2, $3 ); }
   | EXPRESSAO '>' EXPRESSAO 	    { gera_codigo_operador( $$, $1, $2, $3 ); }
   | EXPRESSAO '<' EXPRESSAO 	    { gera_codigo_operador( $$, $1, $2, $3 ); }
+  | EXPRESSAO '=' EXPRESSAO				{ gera_codigo_operador( $$, $1, $2, $3 ); }
   | F
   ;
   
@@ -357,7 +365,9 @@ void inicializa_tabela_de_resultado_de_operacoes() {
   map< string, Tipo > r;
   
   // OBS: a ordem é muito importante!!  
-  r[par(Inteiro, Inteiro)] = Inteiro;    
+  r[par(Inteiro, Inteiro)] = Inteiro;
+  tro[ "%" ] = r;
+
   r[par(Inteiro, Quebrado)] = Quebrado;    
   r[par(Inteiro, Duplo)] = Duplo;    
   r[par(Quebrado, Inteiro)] = Quebrado;    
@@ -378,8 +388,23 @@ void inicializa_tabela_de_resultado_de_operacoes() {
   tro[ "+" ] = r; 
 
   r.clear();
-  r[par(Inteiro, Inteiro)] = Inteiro;
-  tro[ "%" ] = r;
+  r[par(Inteiro, Inteiro)] = Booleano; 
+  r[par(Quebrado, Quebrado)] = Booleano;    
+  r[par(Quebrado, Duplo)] = Booleano;
+	r[par(Quebrado, Inteiro)] = Booleano;
+  r[par(Duplo, Quebrado)] = Booleano;    
+  r[par(Duplo, Duplo)] = Booleano;    
+  r[par(Caracter, Caracter)] = Booleano;      
+  r[par(String, Caracter)] = Booleano;      
+  r[par(Caracter, String)] = Booleano;    
+  r[par(String, String)] = Booleano;    
+  r[par(Booleano, Booleano)] = Booleano;    
+  tro["=="] = r;
+  tro["!="] = r;
+  tro[">="] = r;
+  tro[">"] = r;
+  tro["<"] = r;
+  tro["<="] = r;
 }
 
 void inicializa_tipos() {

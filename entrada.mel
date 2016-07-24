@@ -1,4 +1,5 @@
 DECLARO
+	inteiro ~ par;
   quebrado ~ a;
   quebrado ~ a1, b, c;
   booleano ~ x1, y1;
@@ -30,9 +31,19 @@ FUNCAO semtipo
 {
   b <- 52 * 2 * (3.14);
   a <- b / 2;
+	par <- 2;
 
   birl <- 'Que não vai dar porra.';
   pol <- 'Vai dar merda.';
+
+	se par % 2 = 0 entao
+	{
+		ImprimeLn ( 'Deu merda.' );
+	}
+	senao
+	{
+		ImprimeLn ( 'Nao deu merda.' );
+	};
 
   Imprime( 'Valor: ' );
   ImprimeLn( a );
