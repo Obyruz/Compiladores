@@ -181,6 +181,60 @@ string declara_var_temp( map< string, int >& temp ) {
   return decls;
 }
 
+Atributo& gera_codigo_operador_menor( Atributo& ss, 
+                           const Atributo& s1, 
+                           const Atributo& s3 ) {
+  if( tro.find( "<" ) != tro.end() ) {
+    if( tro["<"].find( par( s1.t, s3.t ) ) != tro["<"].end() ) {
+      ss.t = tro["<"][par( s1.t, s3.t )];
+      ss.v = gera_nome_var( ss.t );      
+      ss.c = s1.c + s3.c + "  " + ss.v + " = " + s1.v + "<" + s3.v 
+             + ";\n";
+			return ss;
+    }
+    else
+      erro( "O operador '<' não está definido para os tipos " + s1.t.nome + " e " + s3.t.nome + "." );
+  }
+  else
+    erro( "Operador '<' não definido." );
+}
+
+void gera_cmd_for(   Atributo& ss,
+										 const Atributo& exp,
+										 const Atributo& expFinal,
+										 const Atributo& cmd_faca ) {
+	string lbl_inicio_for = gera_nome_label( "inicio_for" );
+	string lbl_faca = gera_nome_label( "faca" );
+	string lbl_fim_for = gera_nome_label( "fim_for" );
+
+	Atributo& menor =	gera_codigo_operador_menor( ss, exp, expFinal );
+	ss.c = menor.c + exp.c +
+				 lbl_inicio_for + ":;" +
+				 "\n  if( " + ss.v + " ) goto " + lbl_faca + ";\n" +
+				 lbl_faca + ":;\n" +
+				 cmd_faca.c + "\n" +
+				 lbl_fim_for + ":;\n";
+}
+
+void gera_cmd_while( Atributo& ss,
+										 const Atributo& exp,
+										 const Atributo& cmd_faca ) {
+	string lbl_inicio_while = gera_nome_label( "inicio_while" );
+	string lbl_faca = gera_nome_label( "faca" );
+	string lbl_fim_while = gera_nome_label( "fim_while" );
+
+	if( exp.t.nome != Booleano.nome )
+		erro( "A expressão do ENQUANTO deve ser booleana!" );
+	
+	ss.c = exp.c +
+				 lbl_inicio_while + ":;" +
+				 "\n  if( " + exp.v + " ) goto " + lbl_faca + ";\n" +
+				 lbl_faca + ":;\n" +
+				 cmd_faca.c + 
+				 "  goto " + lbl_inicio_while + ";\n\n" +
+				 lbl_fim_while + ":;\n";
+}
+
 void gera_cmd_if( Atributo& ss, 
                   const Atributo& exp, 
                   const Atributo& cmd_entao ) { 
@@ -208,7 +262,7 @@ void gera_cmd_if_then( Atributo& ss,
     erro( "A expressão do SE deve ser booleana!" );
     
   ss.c = exp.c + 
-         "\nse( " + exp.v + " ) goto " + lbl_entao + ";\n" +
+         "\nif( " + exp.v + " ) goto " + lbl_entao + ";\n" +
          cmd_senao.c + "  goto " + lbl_fim_if + ";\n\n" +
          lbl_entao + ":;\n" + 
          cmd_entao.c + "\n" +
@@ -217,7 +271,7 @@ void gera_cmd_if_then( Atributo& ss,
 %}
 
 %token _IDENTIFICADOR _PROGRAM _IMPRIMELN _IMPRIME _DECLARO _SE _ENTAO _SENAO
-%token _PARA _ATE _FACA _ATRIBUICAO _FUNCAO _RETORNO
+%token _PARA _ATE _ENQUANTO _FACA _ATRIBUICAO _FUNCAO _RETORNO
 %token _INTEIRO _STRING _QUEBRADO _DUPLO _BOOLEANO _CARACTER
 
 %token _CONSTANTE_STRING _CONSTANTE_INTEIRO _CONSTANTE_QUEBRADO
@@ -301,6 +355,7 @@ COMANDOS : COMANDO ';' COMANDOS { $$.c = $1.c + $3.c; }
 COMANDO : SAIDA
     | COMANDO_SE
     | COMANDO_PARA
+		| COMANDO_ENQUANTO
     | BLOCO
     | ATRIBUICAO
     ;
@@ -320,9 +375,13 @@ INDICE : '[' EXPRESSOES ']''['EXPRESSOES']'
 EXPRESSOES : EXPRESSAO ',' EXPRESSOES
      | EXPRESSAO
      ;        
+
+COMANDO_ENQUANTO : _ENQUANTO EXPRESSAO _FACA COMANDO { gera_cmd_while ( $$, $2, $4 ); }
+								 ;
     
-COMANDO_PARA : _PARA _IDENTIFICADOR _ATRIBUICAO EXPRESSAO _ATE EXPRESSAO _FACA COMANDO
-        ;
+COMANDO_PARA : _PARA ATRIBUICAO ';' EXPRESSAO _ATE EXPRESSAO _FACA COMANDO
+							 { gera_cmd_for ( $$, $4, $6, $8 ) ; }
+		         ;
     
 BLOCO : '{' COMANDOS '}' { $$ = $2; }
       ;    

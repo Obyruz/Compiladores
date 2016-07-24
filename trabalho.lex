@@ -16,6 +16,7 @@ ENTAO			[Ee][Nn][Tt][Aa][Oo]
 SENAO			[Ss][Ee][Nn][Aa][Oo]
 PARA			[Pp][Aa][Rr][Aa]
 ATE			[Aa][Tt][Ee]
+ENQUANTO  [Ee][Nn][Qq][Uu][Aa][Nn][Tt][Oo]
 FACA			[Ff][Aa][Cc][Aa]
 FUNCAO		[Ff][Uu][Nn][Cc][Aa][Oo]
 RETORNO		[Rr][Ee][Tt][Oo][Rr][Nn][Oo]
@@ -47,11 +48,12 @@ CONSTANTE_QUEBRADO {DIGITO}+\.{DIGITO}+
 {SE}					{ trata_folha(); return _SE; }
 {ENTAO}				{ trata_folha(); return _ENTAO; }
 {SENAO} 			{ trata_folha(); return _SENAO; }
-{RETORNO}			{ trata_folha(); return _RETORNO; }
 {PARA} 				{ trata_folha(); return _PARA; }
 {ATE}					{ trata_folha(); return _ATE; }
+{ENQUANTO}		{ trata_folha(); return _ENQUANTO; }
 {FACA} 				{ trata_folha(); return _FACA; }
 {FUNCAO}			{ trata_folha(); return _FUNCAO; }
+{RETORNO}			{ trata_folha(); return _RETORNO; }
 
 {CONSTANTE_STRING} 	{ trata_aspas_simples(); return _CONSTANTE_STRING; }
 {CONSTANTE_INTEIRO} 	{ trata_folha(); return _CONSTANTE_INTEIRO; }

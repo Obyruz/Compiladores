@@ -1,5 +1,6 @@
 DECLARO
 	inteiro ~ par;
+	inteiro ~ i;
   quebrado ~ a;
   quebrado ~ a1, b, c;
   booleano ~ x1, y1;
@@ -49,6 +50,19 @@ FUNCAO semtipo
 	{
 		ImprimeLn ( 'Funciona?' );
 	};
+
+	enquanto par % 2 = 0 faca
+	{
+		ImprimeLn( 'Oie. ');
+		par <- par+1;
+	};
+
+	para i <- 0 ; i ate par faca
+	{
+		Imprime( 'Valor: ' );
+		ImprimeLn( i );
+	};
+
 
   Imprime( 'Valor: ' );
   ImprimeLn( a );
