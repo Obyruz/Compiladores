@@ -56,6 +56,7 @@ CONSTANTE_QUEBRADO {DIGITO}+\.{DIGITO}+
 {CONSTANTE_QUEBRADO}    { trata_folha(); return _CONSTANTE_QUEBRADO; }
 
 "<-"			{ trata_folha(); return _ATRIBUICAO; }
+"="			{ trata_folha(); yylval.v = "=="; return _COMPARACAO; }
 
 {IDENTIFICADOR}  { trata_folha(); return _IDENTIFICADOR; }
 

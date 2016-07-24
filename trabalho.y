@@ -49,6 +49,7 @@ map< string, map< string, Tipo > > tro; // tipo_resultado_operacao;
 // contadores para variáveis temporariras
 map< string, int > temp_global;
 map< string, int > temp_local;
+map< string, int > nlabel;
 bool escopo_local = false;
 
 string toString( int n ) {
@@ -69,6 +70,10 @@ int toInt( string valor ) {
 
 string gera_nome_var( Tipo t ) {
   return "t_" + t.nome + "_" + toString( ++(escopo_local ? temp_local : temp_global)[t.nome] );
+}
+
+string gera_nome_label( string cmd ) {
+  return "L_" + cmd + "_" + toString( ++nlabel[cmd] );
 }
 
 ostream& operator << ( ostream& o, const vector<string>& st ) {
@@ -100,7 +105,7 @@ void declara_variavel( Atributo& ss, const Atributo& s3, const Atributo& s1 ) {
     else {
       ts[ s3.lst[i] ] = s1.t; 
       ss.c += s1.t.decl + " " + s3.lst[i] + trata_dimensoes_decl_var( s1.t ) + ";\n"; 
-    }  
+    }
   }
 }
 
@@ -114,17 +119,14 @@ void busca_tipo_da_variavel( Atributo& ss, const Atributo& s1 ) {
 }
 
 void gera_codigo_atribuicao( Atributo& ss, const Atributo& s1, const Atributo& s3 ) {
-  if( s1.t.nome == s3.t.nome ) {
-    if( (s1.t.nome == Quebrado.nome && s3.t.nome == Inteiro.nome ) || 
-      (s3.t.nome == Quebrado.nome && s1.t.nome == Inteiro.nome ) ||
-      (s1.t.nome == Inteiro.nome && s3.t.nome == Inteiro.nome ) || 
-      (s1.t.nome == Quebrado.nome && s3.t.nome == Quebrado.nome ) ) {
+  if( (s1.t.nome != "string" || (s3.t.nome != "string")) &&
+	 ((s1.t.nome == s3.t.nome || s1.t.nome == Quebrado.nome && s3.t.nome == Inteiro.nome ) || 
+      (s3.t.nome == Quebrado.nome && s1.t.nome == Inteiro.nome ))) {
       ss.c = s1.c + s3.c + "  " + s1.v + " = " + s3.v + ";\n";
-    }
-    else if( s1.t.nome == "string" ) {
-      ss.c = s1.c + s3.c + "  " + "strncpy( " + s1.v + ", " + s3.v + ", " + toString(s1.t.dim[0].fim) +" );\n"; //não tá funcionando
-    }
-  }
+   }
+   else if( s1.t.nome == "string" && s3.t.nome == "string" ) {
+      ss.c = s1.c + s3.c + "  " + "strncpy( " + s1.v + ", " + s3.v + ", " + toString(s1.t.dim[0].fim) +" );\n";
+   }
 }
 
 void gera_codigo_lista( Atributo& ss, const Atributo& s2, const Atributo& s3, const Atributo& s5) {
@@ -179,10 +181,20 @@ string declara_var_temp( map< string, int >& temp ) {
   return decls;
 }
 
+
+
+void gera_cmd_if( Atributo& ss, const Atributo& exp, const Atributo& cmd_then, const Atributo& cmd_else ) {
+  string lbl_then = gera_nome_label( "then " );
+  string lbl_end_if = gera_nome_label( "end_if" );
+  if( exp.t.nome != Booleano.nome )
+    erro( "A expressão do SE deve ser booleana!" );
+
+  ss.c = exp.c + "\n if( " + exp.v + " ) goto " + lbl_then + ";\n" + cmd_else.c + " goto " + lbl_end_if + ";\n\n" + "label " + lbl_then + ":\n" + cmd_then.c + "\n" + "label " + lbl_end_if + ":\n";
+}
 %}
 
 %token _IDENTIFICADOR _PROGRAM _IMPRIMELN _IMPRIME _DECLARO _SE _ENTAO _SENAO
-%token _PARA _ATE _FACA _ATRIBUICAO _FUNCAO _RETORNO
+%token _PARA _ATE _FACA _ATRIBUICAO _FUNCAO _RETORNO _COMPARACAO
 %token _INTEIRO _STRING _QUEBRADO _DUPLO _BOOLEANO _CARACTER
 
 %token _CONSTANTE_STRING _CONSTANTE_INTEIRO _CONSTANTE_QUEBRADO
@@ -297,6 +309,7 @@ RETORNO : _RETORNO EXPRESSAO ';'
     
 COMANDO_SE : _SE EXPRESSAO _ENTAO COMANDO
        | _SE EXPRESSAO _ENTAO COMANDO _SENAO COMANDO
+         { gera_cmd_if( $$, $2, $4, $6); }
        ;    
     
 SAIDA : _IMPRIME '(' EXPRESSAO ')'
