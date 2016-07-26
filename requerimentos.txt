@@ -20,7 +20,7 @@ DONE - usar DECLARO por linha pra ficar menos parecido
 DONE - consertar função - tá quebrando linha no final da declaração dos parametros
 DONE - retorno de função - tentar usar uma variável declarada no inicio declarada por uma token específica
 DONE - declara variáveis dentro de função ALMIGHTY CAJADO
-função não consegue ver variáveis globais
+DONE - função não consegue ver variáveis globais
 arrays de mais de uma dimensão 
 arrays de outros tipos
 

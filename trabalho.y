@@ -140,12 +140,20 @@ void declara_variavel( Atributo& ss, string nome, Tipo tipo ) {
 }
 
 void busca_tipo_da_variavel( Atributo& ss, const Atributo& s1 ) {
-  if( ts[ts.size()-1].find( s1.v ) == ts[ts.size()-1].end() )
-        erro( "Variável não declarada: " + s1.v );
+  if( ts[ts.size()-1].find( s1.v ) == ts[ts.size()-1].end() ) {
+		if( ts[0].find( s1.v ) == ts[0].end() ){
+      erro( "Variável não declarada: " + s1.v );
+		}
+	  else {
+	    ss.t = ts[0][ s1.v ];
+	    ss.v = s1.v;
+ 	  }
+	}
   else {
     ss.t = ts[ts.size()-1][ s1.v ];
     ss.v = s1.v;
   }
+	
 }
 
 void gera_codigo_atribuicao( Atributo& ss, const Atributo& s1, const Atributo& s3 ) {
