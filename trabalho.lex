@@ -10,7 +10,10 @@ IDENTIFICADOR      {LETRA}({LETRA}|{DIGITO})*
 
 IMPRIME			[Ii][Mm][Pp][Rr][Ii][Mm][Ee]
 IMPRIMELN	[Ii][Mm][Pp][Rr][Ii][Mm][Ee][Ll][Nn]
+LELN			[Ll][Ee][Ll][Nn]
+LE				[Ll][Ee]
 DECLARO			[D][E][C][L][A][R][O]
+CAJADO			[C][A][J][A][D][O]
 SE			[Ss][Ee]
 ENTAO			[Ee][Nn][Tt][Aa][Oo]
 SENAO			[Ss][Ee][Nn][Aa][Oo]
@@ -38,6 +41,8 @@ CONSTANTE_QUEBRADO {DIGITO}+\.{DIGITO}+
 
 {IMPRIMELN} 	{ trata_folha(); return _IMPRIMELN; } 
 {IMPRIME} 		{ trata_folha(); return _IMPRIME; }
+{LELN}				{ trata_folha(); return _LELN; }
+{LE}					{ trata_folha(); return _LE; }
 {STRING} 			{ trata_folha(); return _STRING; }
 {INTEIRO} 		{ trata_folha(); return _INTEIRO; }
 {QUEBRADO}		{ trata_folha(); return _QUEBRADO; }
@@ -45,6 +50,7 @@ CONSTANTE_QUEBRADO {DIGITO}+\.{DIGITO}+
 {BOOLEANO} 		{ trata_folha(); return _BOOLEANO; }
 {CARACTER}		{ trata_folha(); return _CARACTER; }
 {DECLARO}			{ trata_folha(); return _DECLARO; }
+{CAJADO}			{ trata_folha(); return _CAJADO; }
 {SE}					{ trata_folha(); return _SE; }
 {ENTAO}				{ trata_folha(); return _ENTAO; }
 {SENAO} 			{ trata_folha(); return _SENAO; }

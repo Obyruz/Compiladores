@@ -14,3 +14,14 @@ L1:
 5) Funções
 
 6) array dim = 1
+
+FALTA
+DONE - usar DECLARO por linha pra ficar menos parecido	
+DONE - consertar função - tá quebrando linha no final da declaração dos parametros
+DONE - retorno de função - tentar usar uma variável declarada no inicio declarada por uma token específica
+DONE - declara variáveis dentro de função ALMIGHTY CAJADO
+função não consegue ver variáveis globais
+arrays de mais de uma dimensão 
+arrays de outros tipos
+
+ver se tudo o que fizemos é aceito pelo gabarito

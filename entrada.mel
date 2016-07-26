@@ -1,71 +1,40 @@
-DECLARO
-	inteiro ~ par;
-	inteiro ~ i;
-  quebrado ~ a;
-  quebrado ~ a1, b, c;
-  booleano ~ x1, y1;
-  QUEBRADO ~ resultado;
-  STRING[20] ~ pol;
-  String ~ birl;
+DECLARO	 inteiro ~ par;
+DECLARO	 inteiro ~ i;
+DECLARO	 inteiro ~ x;
+DECLARO  inteiro ~ a;
+DECLARO  quebrado ~ a1, b, c;
+DECLARO  booleano ~ x1, y1;
+DECLARO  STRING[20] ~ pol;
+CAJADO  String ~ birl;
 
-funcao string ~ abra
+FUNCAO inteiro ~ funcaoTeste (inteiro ~ broken, quebrado ~ pe)
 {
-	ImprimeLn( 'sou uma funcao feliz :) ');
-	retorno a;
-}
+	CAJADO INTEIRO ~ biscoito;
+	CAJADO INTEIRO ~ i;
+	biscoito <- 0;
 
-FUNCAO QUEBRADO ~ marmota(INTEIRO ~ numero)
-{
-  resultado <- 0;
-  resultado <- resultado + numero;	
+	ENQUANTO( biscoito > 5 ) {
+		IMPRIMELN( biscoito );
+  }  
 
-  IMPRIMELN('DECLARACAO DE VARIAVEIS DENTRO DA FUNCAO NAO ESTA FUNCIONANDO POR ENQUANTO');
+	SE( biscoito = 0 ) {
+		IMPRIMELN( 15 );
+	} SENAO {
+		IMPRIMELN( biscoito + 2 );
+	}	
 
-  RETORNO resultado;
-}
-
-FUNCAO semtipo
-{
-  IMPRIMELN( 'void look alike' );
-}
-
-{
-  b <- 52 * 2 * (3.14);
-  a <- b / 2;
-	par <- 2;
-
-  birl <- 'Que não vai dar porra.';
-  pol <- 'Vai dar merda.';
-
-	se par % 2 = 0 entao
-	{
-		ImprimeLn ( 'Deu merda.' );
+	PARA(i <- 0; i ATE biscoito) {
+		i <- i + 1;
+		IMPRIMELN('EXODIA');
 	}
-	senao
-	{
-		ImprimeLn ( 'Nao deu merda.' );
-	};
 
-	se a < 2 entao
-	{
-		ImprimeLn ( 'Funciona?' );
-	};
+	retorno biscoito * 2;
+}
 
-	enquanto par % 2 = 0 faca
-	{
-		ImprimeLn( 'Oie. ');
-		par <- par+1;
-	};
-
-	para i <- 0 ; i ate par faca
-	{
-		Imprime( 'Valor: ' );
-		ImprimeLn( i );
-	};
-
+{
+	CAJADO inteiro ~ feliz;
 
   Imprime( 'Valor: ' );
   ImprimeLn( a );
   ImprimeLn( pol );
 }
-

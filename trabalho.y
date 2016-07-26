@@ -43,7 +43,10 @@ int yyparse();
 void yyerror(const char *);
 void erro( string );
 
-map<string,Tipo> ts;
+// Tabela d Símbolos (variáveis)
+vector < map<string, Tipo > > ts;
+map<string, Tipo>  tf;
+
 map< string, map< string, Tipo > > tro; // tipo_resultado_operacao;
 
 // contadores para variáveis temporariras
@@ -66,6 +69,14 @@ int toInt( string valor ) {
   sscanf( valor.c_str(), "%d", &aux );
   
   return aux;
+}
+
+void empilha_nova_tabela_de_simbolos() {
+	ts.push_back( map< string, Tipo >() );
+}
+
+void desempilha_tabela_de_simbolos() {
+	ts.pop_back();
 }
 
 string gera_nome_var( Tipo t ) {
@@ -97,23 +108,42 @@ string trata_dimensoes_decl_var( Tipo t ) {
 }
 
 // 'Atributo&': o '&' significa passar por referência (modifica).
-void declara_variavel( Atributo& ss, const Atributo& s3, const Atributo& s1 ) {
+void declara_variavel( Atributo& ss, vector<string> lst, Tipo tipo) {
   ss.c = "";
-  for( int i = 0; i < s3.lst.size(); i++ ) {
-    if( ts.find( s3.lst[i] ) != ts.end() ) 
-      erro( "Variável já declarada: " + s3.lst[i] );
+  for( int i = 0; i < lst.size(); i++ ) {
+    if( ts[ts.size()-1].find( lst[i] ) != ts[ts.size()-1].end() ) 
+      erro( "Variável já declarada: " + lst[i] );
     else {
-      ts[ s3.lst[i] ] = s1.t; 
-      ss.c += s1.t.decl + " " + s3.lst[i] + trata_dimensoes_decl_var( s1.t ) + ";\n"; 
+      ts[ts.size()-1][ lst[i] ] = tipo; 
+      ss.c += tipo.decl + " " + lst[i] + trata_dimensoes_decl_var( tipo ) + ";\n"; 
     }
   }
 }
 
+void declara_parametro( Atributo& ss, vector<string> lst, Tipo tipo) {
+  ss.c = "";
+
+  for( int i = 0; i < lst.size(); i++ ) {
+    if( ts[ts.size()-1].find( lst[i] ) != ts[ts.size()-1].end() ) 
+      erro( "Parametro já declarado: " + lst[i] );
+    else {
+      ts[ts.size()-1][ lst[i] ] = tipo; 
+      ss.c += tipo.decl + " " + lst[i] + trata_dimensoes_decl_var( tipo ) + ", "; 
+    }
+  }
+}
+
+void declara_variavel( Atributo& ss, string nome, Tipo tipo ) {
+  vector<string> lst;
+  lst.push_back( nome );
+  declara_variavel( ss, lst, tipo );
+}
+
 void busca_tipo_da_variavel( Atributo& ss, const Atributo& s1 ) {
-  if( ts.find( s1.v ) == ts.end() )
+  if( ts[ts.size()-1].find( s1.v ) == ts[ts.size()-1].end() )
         erro( "Variável não declarada: " + s1.v );
   else {
-    ss.t = ts[ s1.v ];
+    ss.t = ts[ts.size()-1][ s1.v ];
     ss.v = s1.v;
   }
 }
@@ -147,8 +177,7 @@ void gera_codigo_operador( Atributo& ss,
     if( tro[s2.v].find( par( s1.t, s3.t ) ) != tro[s2.v].end() ) {
       ss.t = tro[s2.v][par( s1.t, s3.t )];
       ss.v = gera_nome_var( ss.t );      
-      ss.c = s1.c + s3.c + "  " + ss.v + " = " + s1.v + s2.v + s3.v 
-             + ";\n";
+      ss.c = s1.c + s3.c + "  " + ss.v + " = " + s1.v + s2.v + s3.v + ";\n";
     }
     else
       erro( "O operador '" + s2.v + "' não está definido para os tipos " + s1.t.nome + " e " + s3.t.nome + "." );
@@ -167,7 +196,7 @@ string declara_nvar_temp( Tipo t, int qtde ) {
 }
 
 string declara_var_temp( map< string, int >& temp ) {
-    string decls = "// variáveis temporárias \n" + 
+    string decls = "" + 
     declara_nvar_temp( Inteiro, temp[Inteiro.nome] ) +
     declara_nvar_temp( Quebrado, temp[Quebrado.nome] ) +
     declara_nvar_temp( Duplo, temp[Duplo.nome] ) +
@@ -212,7 +241,9 @@ void gera_cmd_for(   Atributo& ss,
 				 lbl_inicio_for + ":;" +
 				 "\n  if( " + ss.v + " ) goto " + lbl_faca + ";\n" +
 				 lbl_faca + ":;\n" +
-				 cmd_faca.c + "\n" +
+				 cmd_faca.c + 
+				 "  " + exp.v + " = " + exp.v + "+ 1;\n" +
+				 "  goto " + lbl_inicio_for + ";\n\n" +
 				 lbl_fim_for + ":;\n";
 }
 
@@ -268,9 +299,29 @@ void gera_cmd_if_then( Atributo& ss,
          cmd_entao.c + "\n" +
          lbl_fim_if + ":;\n"; 
 }
-%}
 
-%token _IDENTIFICADOR _PROGRAM _IMPRIMELN _IMPRIME _DECLARO _SE _ENTAO _SENAO
+void gera_codigo_funcao( Atributo& ss,
+												 string nome,
+												 string params,
+												 Tipo retorno,
+												 string bloco ) {
+	ss.c = retorno.decl + " " + nome + "( " + params + " )" +
+				 "{\n" +
+				 declara_var_temp ( temp_local ) +
+				 bloco +
+				 "}\n";
+}
+
+void gera_bloco_com_retorno(Atributo& ss, Atributo& s1, Atributo& s3) {
+		ss.c = s1.c + s3.c + ";\n";
+}
+
+void gera_retorno( Atributo& ss, Atributo& s2) {
+	ss.c = s2.c + "\n" + "return " + s2.v;
+}
+%}	
+
+%token _IDENTIFICADOR _PROGRAM _IMPRIMELN _IMPRIME _LELN _LE _DECLARO _CAJADO _SE _ENTAO _SENAO
 %token _PARA _ATE _ENQUANTO _FACA _ATRIBUICAO _FUNCAO _RETORNO
 %token _INTEIRO _STRING _QUEBRADO _DUPLO _BOOLEANO _CARACTER
 
@@ -290,7 +341,7 @@ EXPRESSAO_INICIAL : CABECALHO MEIOS EXPRESSAO_PRINCIPAL
    
 CABECALHO : 
        { $$.c = "#include <stdlib.h>\n"
-		"#include <string.h>\n"
+								"#include <string.h>\n"
                 "#include <stdio.h>\n\n";
        }              
      ;   
@@ -305,27 +356,41 @@ MEIO : VARIAVEIS
       | FUNCAO 
       ;          
    
-FUNCAO : _FUNCAO TIPO '~' _IDENTIFICADOR '(' PARAMETROS ')' BLOCO_COM_RETORNO
-         | _FUNCAO TIPO '~' _IDENTIFICADOR BLOCO_COM_RETORNO
-	 | _FUNCAO _IDENTIFICADOR BLOCO
-         ;    
+FUNCAO : _FUNCAO TIPO '~' _IDENTIFICADOR { escopo_local = true; 
+			 	 															     empilha_nova_tabela_de_simbolos(); } 
+			 '(' PARAMETROS ')' BLOCO_COM_RETORNO
+			 { gera_codigo_funcao($$, $4.v, $7.c = $7.c.substr(0, $7.c.size()-2) , $2.t, $9.c );
+			 	 escopo_local = false; desempilha_tabela_de_simbolos(); }
+       | _FUNCAO TIPO '~' _IDENTIFICADOR { escopo_local = true; empilha_nova_tabela_de_simbolos(); } BLOCO_COM_RETORNO
+			 { gera_codigo_funcao($$, $4.v, "", $2.t, $6.c );
+			   escopo_local = false; desempilha_tabela_de_simbolos(); }					
+	 		 | _FUNCAO _IDENTIFICADOR BLOCO
+       ;    
 
 BLOCO_COM_RETORNO : '{' COMANDOS RETORNO '}'
-		  ;
+										{ gera_bloco_com_retorno($$, $2, $3); }
+		  						;
 
-PARAMETROS : DECLARACAO ';' PARAMETROS
-           | DECLARACAO
+RETORNO : _RETORNO EXPRESSAO ';'
+					{ gera_retorno($$, $2); }
+				;
+
+PARAMETROS : PARAMETRO ',' PARAMETROS { $$.c = $1.c + $3.c; }
+           | PARAMETRO { $$.c = $1.c; }
            ;         
 
-VARIAVEIS : _DECLARO DECLARACOES { $$.c = $2.c; }
-     ;
+PARAMETRO : TIPO '~' IDENTIFICADOR { declara_parametro( $$, $3.lst, $1.t ); }
+					;
+
+VARIAVEIS : DECLARACOES { $$.c = $1.c; }
+		      ;
      
-DECLARACOES : DECLARACAO ';' DECLARACOES { $$.c = $1.c + $3.c; }
-      | DECLARACAO ';'
-      ;   
+DECLARACOES : _DECLARO DECLARACAO ';' DECLARACOES { $$.c = $2.c + $4.c; }
+     				| _CAJADO DECLARACAO ';' { $$.c = $2.c; }
+			      ;   
      
-DECLARACAO : TIPO '~' IDENTIFICADORES { declara_variavel( $$, $3, $1 ); }       
-     ;
+DECLARACAO : TIPO '~' IDENTIFICADORES { declara_variavel( $$, $3.lst, $1.t ); }       
+			     ;
      
 TIPO : _INTEIRO { $$.t = Inteiro; }	
      | _QUEBRADO { $$.t = Quebrado; }
@@ -341,27 +406,32 @@ TAM_STRING : '[' _CONSTANTE_INTEIRO ']'
            ;
 
 IDENTIFICADORES : IDENTIFICADORES ',' _IDENTIFICADOR { $$.lst = $1.lst; $$.lst.push_back( $3.v ); }
-    | _IDENTIFICADOR         			     { $$.lst.push_back( $1.v ); }
+    | IDENTIFICADOR
     ;       
    
+IDENTIFICADOR : _IDENTIFICADOR { $$.lst.push_back( $1.v ); }
+							;
+
 EXPRESSAO_PRINCIPAL : '{' COMANDOS '}'
             { $$.c = "int main() {\n" + $2.c + "}\n"; }
           ;
           
-COMANDOS : COMANDO ';' COMANDOS { $$.c = $1.c + $3.c; }
+COMANDOS : COMANDO COMANDOS { $$.c = $1.c + $2.c; }
      | { $$.c = ""; }
      ;                   
  
 COMANDO : SAIDA
+		| ENTRADA
+		| VARIAVEIS
     | COMANDO_SE
     | COMANDO_PARA
 		| COMANDO_ENQUANTO
-    | BLOCO
+		| BLOCO
     | ATRIBUICAO
     ;
     
-ATRIBUICAO : VALOR_ESQUERDA INDICE _ATRIBUICAO EXPRESSAO
-	   | VALOR_ESQUERDA _ATRIBUICAO EXPRESSAO
+ATRIBUICAO : VALOR_ESQUERDA INDICE _ATRIBUICAO EXPRESSAO ';'
+	   | VALOR_ESQUERDA _ATRIBUICAO EXPRESSAO ';'
 	     { gera_codigo_atribuicao( $$, $1, $3); } 
            ;    
 
@@ -376,30 +446,33 @@ EXPRESSOES : EXPRESSAO ',' EXPRESSOES
      | EXPRESSAO
      ;        
 
-COMANDO_ENQUANTO : _ENQUANTO EXPRESSAO _FACA COMANDO { gera_cmd_while ( $$, $2, $4 ); }
+COMANDO_ENQUANTO : _ENQUANTO '(' EXPRESSAO ')' COMANDO { gera_cmd_while ( $$, $3, $5 ); }
 								 ;
-    
-COMANDO_PARA : _PARA ATRIBUICAO ';' EXPRESSAO _ATE EXPRESSAO _FACA COMANDO
+
+COMANDO_PARA : _PARA '(' ATRIBUICAO EXPRESSAO _ATE EXPRESSAO ')' COMANDO
 							 { gera_cmd_for ( $$, $4, $6, $8 ) ; }
 		         ;
     
 BLOCO : '{' COMANDOS '}' { $$ = $2; }
       ;    
-
-RETORNO : _RETORNO EXPRESSAO ';'
-	;
     
-COMANDO_SE : _SE EXPRESSAO _ENTAO COMANDO { gera_cmd_if( $$, $2, $4 ); }
-       | _SE EXPRESSAO _ENTAO COMANDO _SENAO COMANDO
-         { gera_cmd_if_then( $$, $2, $4, $6); }
+COMANDO_SE : _SE '(' EXPRESSAO ')' COMANDO { gera_cmd_if( $$, $3, $5 ); }
+       | _SE '(' EXPRESSAO ')' COMANDO _SENAO COMANDO
+         { gera_cmd_if_then( $$, $3, $5, $7); }
        ;    
     
-SAIDA : _IMPRIME '(' EXPRESSAO ')'
+SAIDA : _IMPRIME '(' EXPRESSAO ')' ';'
         { $$.c = "  printf( \"%"+ $3.t.fmt + "\", " + $3.v + " );\n"; }
-      | _IMPRIMELN '(' EXPRESSAO ')'
+      | _IMPRIMELN '(' EXPRESSAO ')' ';'
         { $$.c = "  printf( \"%"+ $3.t.fmt + "\\n\", " + $3.v + " );\n"; }
       ;
    
+ENTRADA : _LELN '(' VALOR_ESQUERDA ')' ';'
+					{ $$.c = "  scanf( \"%" + $3.t.fmt + "\\n\" , &" + $3.v + " );\n"; }
+				| _LE '(' VALOR_ESQUERDA ')' ';'
+					{ $$.c = "  scanf( \"%" + $3.t.fmt + "\", &" + $3.v + " );\n"; }
+				;
+
 EXPRESSAO : EXPRESSAO '+' EXPRESSAO { gera_codigo_operador( $$, $1, $2, $3 ); }
   | EXPRESSAO '-' EXPRESSAO         { gera_codigo_operador( $$, $1, $2, $3 ); }
   | EXPRESSAO '*' EXPRESSAO 	    { gera_codigo_operador( $$, $1, $2, $3 ); }
@@ -416,6 +489,7 @@ F : _CONSTANTE_STRING   { $$ = $1; $$.t = String; }
   | _CONSTANTE_QUEBRADO { $$ = $1; $$.t = Quebrado; }
   | _IDENTIFICADOR      { busca_tipo_da_variavel( $$, $1 );  }
   | '(' EXPRESSAO ')'   { $$ = $2; } 
+	| _IDENTIFICADOR '(' EXPRESSAO ')' //{ $$.c = $3.c + "  " + $1.v + "( " + $3.t + " );\n"; }
   ;     
  
 %%
@@ -492,5 +566,6 @@ int main( int argc, char* argv[] )
 {
   inicializa_tipos();
   inicializa_tabela_de_resultado_de_operacoes();
+	empilha_nova_tabela_de_simbolos();
   yyparse();
 }
