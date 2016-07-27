@@ -329,7 +329,16 @@ void gera_retorno( Atributo& ss, Atributo& s2) {
 }
 
 void inicializa_tipo(Atributo& ss, Atributo& s2) {
-  Range r = { toInt( s2.v ) };
+	Range r = { toInt( s2.v ) };
+
+	if( ss.t.dim == 0 ){
+		cout << "entrei auqi";
+		Range aux = ss.t.dim.back();
+		ss.t.dim.pop_back();
+		
+		r.fim = r.fim * aux.fim;
+	}  
+
   
   ss.t.dim.push_back( r );
 }
@@ -407,32 +416,48 @@ DECLARACOES : _DECLARO DECLARACAO ';' DECLARACOES { $$.c = $2.c + $4.c; }
 DECLARACAO : TIPO '~' IDENTIFICADORES { declara_variavel( $$, $3.lst, $1.t ); }       
 			     ;
      
-TIPO : _INTEIRO TAM_INTEIRO { $$.t = $2.t; }	
-     | _QUEBRADO TAM_QUEBRADO { $$.t = $2.t; }
-     | _DUPLO TAM_DUPLO { $$.t = $2.t; }
+TIPO : _INTEIRO TAM_INTEIROS { $$.t = $2.t; }	
+     | _QUEBRADO TAM_QUEBRADOS { $$.t = $2.t; }
+     | _DUPLO TAM_DUPLOS { $$.t = $2.t; }
      | _BOOLEANO { $$.t = Booleano; }
      | _CARACTER { $$.t = Caracter; }
-     | _STRING TAM_STRING { $$.t = $2.t; }
+     | _STRING TAM_STRINGS { $$.t = $2.t; }
      ;
+
+TAM_STRINGS : TAM_STRING
+						| TAM_STRING TAM_STRING
+            | { $$.v = ""; }
+						;
      
 TAM_STRING : '[' _CONSTANTE_INTEIRO ']' 
              { $$.t = String; $$.t.dim[0].fim = toInt( $2.v ); }
-           | { $$.v = ""; }
            ;
+
+TAM_INTEIROS : TAM_INTEIRO
+						| TAM_INTEIRO TAM_INTEIRO
+						| { $$.v = "0"; $$.t = Inteiro; }
+						 ;
 
 TAM_INTEIRO : '[' _CONSTANTE_INTEIRO ']'
 							{ $$.t = Inteiro; inicializa_tipo($$, $2); }
-						| { $$.v = "0"; $$.t = Inteiro; }
 						;
+
+TAM_QUEBRADOS : TAM_QUEBRADO
+							| TAM_QUEBRADO TAM_QUEBRADO
+							| { $$.v = "0.0"; $$.t = Quebrado; }
+							;
 
 TAM_QUEBRADO : '[' _CONSTANTE_INTEIRO ']'
 							{ $$.t = Quebrado; inicializa_tipo($$, $2); }
-						| { $$.v = "0.0"; $$.t = Quebrado; }
 						;								
+
+TAM_DUPLOS : TAM_DUPLO
+						| TAM_DUPLO TAM_DUPLO
+						| { $$.v = "0.0"; $$.t = Duplo; }
+					 ;
 
 TAM_DUPLO : '[' _CONSTANTE_INTEIRO ']'
 							{ $$.t = Duplo; inicializa_tipo($$, $2); }
-						| { $$.v = "0.0"; $$.t = Duplo; }
 						;								
 
 IDENTIFICADORES : IDENTIFICADORES ',' _IDENTIFICADOR { $$.lst = $1.lst; $$.lst.push_back( $3.v ); }

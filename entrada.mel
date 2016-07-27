@@ -1,7 +1,7 @@
 DECLARO	 inteiro ~ i;
 DECLARO	 inteiro ~ x;
 DECLARO  inteiro ~ a;
-DECLARO	 inteiro[21] ~ vetorBolado;
+DECLARO	 inteiro[21][3] ~ vetorBolado;
 DECLARO quebrado[512] ~ vetorQuebrado;
 DECLARO duplo[100] ~ vetorDuplo;
 DECLARO  quebrado ~ a1, b, c;
