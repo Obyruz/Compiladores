@@ -1,7 +1,9 @@
-DECLARO	 inteiro ~ par;
 DECLARO	 inteiro ~ i;
 DECLARO	 inteiro ~ x;
 DECLARO  inteiro ~ a;
+DECLARO	 inteiro[21] ~ vetorBolado;
+DECLARO quebrado[512] ~ vetorQuebrado;
+DECLARO duplo[100] ~ vetorDuplo;
 DECLARO  quebrado ~ a1, b, c;
 DECLARO  booleano ~ x1, y1;
 DECLARO  STRING[20] ~ pol;
@@ -10,7 +12,6 @@ CAJADO  String ~ birl;
 FUNCAO inteiro ~ funcaoTeste (inteiro ~ broken, quebrado ~ pe)
 {
 	CAJADO INTEIRO ~ biscoito;
-	CAJADO INTEIRO ~ i;
 	biscoito <- 0;
 
 	ENQUANTO( biscoito > 5 ) {
